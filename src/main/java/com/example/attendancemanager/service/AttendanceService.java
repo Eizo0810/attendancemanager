@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.attendancemanager.entity.AppUser;
 import com.example.attendancemanager.entity.AttendanceRecord;
 import com.example.attendancemanager.repository.AttendanceRepository;
 
@@ -26,7 +27,11 @@ public class AttendanceService {
         return attendanceRepository.save(attendanceRecord);
     }
     
-    public Optional<AttendanceRecord> findTodayRecord() {
-        return attendanceRepository.findByWorkDate(LocalDate.now());
+    public Optional<AttendanceRecord> findTodayRecord(AppUser user) {
+        return attendanceRepository.findByUserAndWorkDate(user, LocalDate.now());
+    }
+    
+    public List<AttendanceRecord> findByUser(AppUser user) {
+        return attendanceRepository.findByUser(user);
     }
 }
