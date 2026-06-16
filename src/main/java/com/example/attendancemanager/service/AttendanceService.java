@@ -34,4 +34,9 @@ public class AttendanceService {
     public List<AttendanceRecord> findByUser(AppUser user) {
         return attendanceRepository.findByUser(user);
     }
+    
+    public AttendanceRecord findById(Long id) {
+        return attendanceRepository.findById(id)
+                .orElseThrow();
+    }
 }

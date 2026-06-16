@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.attendancemanager.entity.AppUser;
 import com.example.attendancemanager.entity.AttendanceRecord;
@@ -45,6 +47,16 @@ public class AttendanceController {
         return "attendance/index";
     }
     
+    @GetMapping("/attendance/{id}/edit")
+    public String editForm(@PathVariable Long id, Model model) {
+
+        AttendanceRecord record = attendanceService.findById(id);
+
+        model.addAttribute("record", record);
+
+        return "attendance/edit";
+    }
+    
     @PostMapping("/attendance/clock-in")
     public String clockIn(Principal principal) {
 
@@ -75,6 +87,20 @@ public class AttendanceController {
                 .orElseThrow();
 
         record.setClockOutTime(LocalDateTime.now());
+
+        attendanceService.save(record);
+
+        return "redirect:/attendance";
+    }
+    
+    @PostMapping("/attendance/{id}/edit")
+    public String updateBreakMinutes(
+            @PathVariable Long id,
+            @RequestParam Integer breakMinutes) {
+
+        AttendanceRecord record = attendanceService.findById(id);
+
+        record.setBreakMinutes(breakMinutes);
 
         attendanceService.save(record);
 
