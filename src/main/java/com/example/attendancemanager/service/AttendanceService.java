@@ -50,4 +50,10 @@ public class AttendanceService {
                 startDate,
                 endDate);
     }
+    
+    public long calculateTotalWorkingMinutes(List<AttendanceRecord> records) {
+        return records.stream()
+                .mapToLong(AttendanceRecord::getWorkingMinutes)
+                .sum();
+    }
 }

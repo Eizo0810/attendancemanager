@@ -3,6 +3,7 @@ package com.example.attendancemanager.controller;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,19 +42,23 @@ public class AttendanceController {
                 .findByUsername(principal.getName())
                 .orElseThrow();
 
+        List<AttendanceRecord> records;
+
         if (startDate != null && endDate != null) {
-            model.addAttribute(
-                    "records",
-                    attendanceService.findByUserAndWorkDateBetween(
-                            user,
-                            startDate,
-                            endDate));
+            records = attendanceService.findByUserAndWorkDateBetween(
+                    user,
+                    startDate,
+                    endDate);
         } else {
-            model.addAttribute(
-                    "records",
-                    attendanceService.findByUser(user));
+            records = attendanceService.findByUser(user);
         }
 
+        long totalWorkingMinutes =
+                attendanceService.calculateTotalWorkingMinutes(records);
+
+        model.addAttribute("records", records);
+        model.addAttribute("totalWorkingHours", totalWorkingMinutes / 60);
+        model.addAttribute("remainingMinutes", totalWorkingMinutes % 60);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
 
