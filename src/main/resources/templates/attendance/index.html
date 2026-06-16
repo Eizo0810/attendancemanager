@@ -9,6 +9,12 @@
 <div class="container mt-4">
 
     <h1 class="mb-4">勤怠一覧</h1>
+	
+	<form th:action="@{/attendance/clock-in}" method="post" class="mb-3">
+	    <button type="submit" class="btn btn-primary">
+	        出勤
+	    </button>
+	</form>
 
     <table class="table table-bordered table-striped">
         <tr>
