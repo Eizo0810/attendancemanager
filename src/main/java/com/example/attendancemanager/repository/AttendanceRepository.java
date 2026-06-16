@@ -1,6 +1,7 @@
 package com.example.attendancemanager.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ extends JpaRepository<AttendanceRecord, Long> {
 	Optional<AttendanceRecord> findByUserAndWorkDate(
 	        AppUser user,
 	        LocalDate workDate);
+	
+	List<AttendanceRecord> findByUser(AppUser user);
 }
