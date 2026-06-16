@@ -33,16 +33,29 @@ public class AttendanceController {
     @GetMapping("/attendance")
     public String index(
             Model model,
-            Principal principal) {
+            Principal principal,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
 
-        AppUser user =
-                appUserRepository
-                        .findByUsername(principal.getName())
-                        .orElseThrow();
+        AppUser user = appUserRepository
+                .findByUsername(principal.getName())
+                .orElseThrow();
 
-        model.addAttribute(
-                "records",
-                attendanceService.findByUser(user));
+        if (startDate != null && endDate != null) {
+            model.addAttribute(
+                    "records",
+                    attendanceService.findByUserAndWorkDateBetween(
+                            user,
+                            startDate,
+                            endDate));
+        } else {
+            model.addAttribute(
+                    "records",
+                    attendanceService.findByUser(user));
+        }
+
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
         return "attendance/index";
     }

@@ -17,4 +17,9 @@ extends JpaRepository<AttendanceRecord, Long> {
 	        LocalDate workDate);
 	
 	List<AttendanceRecord> findByUser(AppUser user);
+	
+	List<AttendanceRecord> findByUserAndWorkDateBetween(
+	        AppUser user,
+	        LocalDate startDate,
+	        LocalDate endDate);
 }

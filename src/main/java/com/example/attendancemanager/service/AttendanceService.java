@@ -39,4 +39,15 @@ public class AttendanceService {
         return attendanceRepository.findById(id)
                 .orElseThrow();
     }
+    
+    public List<AttendanceRecord> findByUserAndWorkDateBetween(
+            AppUser user,
+            LocalDate startDate,
+            LocalDate endDate) {
+
+        return attendanceRepository.findByUserAndWorkDateBetween(
+                user,
+                startDate,
+                endDate);
+    }
 }
