@@ -5,10 +5,13 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.example.attendancemanager.entity.AppUser;
 import com.example.attendancemanager.entity.AttendanceRecord;
 
 public interface AttendanceRepository
 extends JpaRepository<AttendanceRecord, Long> {
 	
-	Optional<AttendanceRecord> findByWorkDate(LocalDate workDate);
+	Optional<AttendanceRecord> findByUserAndWorkDate(
+	        AppUser user,
+	        LocalDate workDate);
 }
