@@ -77,4 +77,18 @@ public class AttendanceRecord {
     public void setNote(String note) {
         this.note = note;
     }
+    
+    public long getWorkingMinutes() {
+        if (clockInTime == null || clockOutTime == null) {
+            return 0;
+        }
+
+        long minutes = java.time.Duration.between(clockInTime, clockOutTime).toMinutes();
+
+        if (breakMinutes != null) {
+            minutes -= breakMinutes;
+        }
+
+        return minutes;
+    }
 }

@@ -29,6 +29,7 @@
             <th>出勤時刻</th>
             <th>退勤時刻</th>
             <th>休憩時間（分）</th>
+			<th>勤務時間（分）</th>
             <th>備考</th>
         </tr>
 
@@ -38,6 +39,7 @@
             <td th:text="${record.clockInTime}"></td>
             <td th:text="${record.clockOutTime}"></td>
             <td th:text="${record.breakMinutes}"></td>
+			<td th:text="${record.workingMinutes}"></td>
             <td th:text="${record.note}"></td>
         </tr>
     </table>
