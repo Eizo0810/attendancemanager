@@ -15,6 +15,12 @@
 	        出勤
 	    </button>
 	</form>
+	
+	<form th:action="@{/attendance/clock-out}" method="post" class="mb-3">
+	    <button type="submit" class="btn btn-danger">
+	        退勤
+	    </button>
+	</form>
 
     <table class="table table-bordered table-striped">
         <tr>

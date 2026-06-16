@@ -38,4 +38,17 @@ public class AttendanceController {
 
         return "redirect:/attendance";
     }
+    
+    @PostMapping("/attendance/clock-out")
+    public String clockOut() {
+
+        AttendanceRecord record = attendanceService.findTodayRecord()
+                .orElseThrow();
+
+        record.setClockOutTime(LocalDateTime.now());
+
+        attendanceService.save(record);
+
+        return "redirect:/attendance";
+    }
 }
