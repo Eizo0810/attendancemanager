@@ -84,6 +84,14 @@ public class AttendanceRecord {
         this.note = note;
     }
     
+    public AppUser getUser() {
+        return user;
+    }
+
+    public void setUser(AppUser user) {
+        this.user = user;
+    }
+    
     public long getWorkingMinutes() {
         if (clockInTime == null || clockOutTime == null) {
             return 0;
