@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.attendancemanager.entity.AppUser;
 import com.example.attendancemanager.entity.AttendanceRecord;
+import com.example.attendancemanager.exception.AccessDeniedException;
 import com.example.attendancemanager.repository.AttendanceRepository;
 
 @Service
@@ -38,6 +39,11 @@ public class AttendanceService {
     public AttendanceRecord findById(Long id) {
         return attendanceRepository.findById(id)
                 .orElseThrow();
+    }
+
+    public AttendanceRecord findByIdAndUser(Long id, AppUser user) {
+        return attendanceRepository.findByIdAndUser(id, user)
+                .orElseThrow(AccessDeniedException::new);
     }
     
     public List<AttendanceRecord> findByUserAndWorkDateBetween(

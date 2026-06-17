@@ -66,9 +66,16 @@ public class AttendanceController {
     }
     
     @GetMapping("/attendance/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String editForm(
+            @PathVariable Long id,
+            Model model,
+            Principal principal) {
 
-        AttendanceRecord record = attendanceService.findById(id);
+        AppUser user = appUserRepository
+                .findByUsername(principal.getName())
+                .orElseThrow();
+
+        AttendanceRecord record = attendanceService.findByIdAndUser(id, user);
 
         model.addAttribute("record", record);
 
@@ -114,9 +121,14 @@ public class AttendanceController {
     @PostMapping("/attendance/{id}/edit")
     public String updateBreakMinutes(
             @PathVariable Long id,
-            @RequestParam Integer breakMinutes) {
+            @RequestParam Integer breakMinutes,
+            Principal principal) {
 
-        AttendanceRecord record = attendanceService.findById(id);
+        AppUser user = appUserRepository
+                .findByUsername(principal.getName())
+                .orElseThrow();
+
+        AttendanceRecord record = attendanceService.findByIdAndUser(id, user);
 
         record.setBreakMinutes(breakMinutes);
 
