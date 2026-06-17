@@ -1,2 +1,164 @@
-# attendancemanager
-勤怠管理システム（Spring Boot + PostgreSQL）
+# AttendanceManager
+
+Spring Boot と PostgreSQL で作成した勤怠管理アプリケーションです。
+
+ログインしたユーザーごとに、出勤・退勤時刻、休憩時間、勤務時間を管理できます。
+求職管理アプリ `jobmanager` の構成をもとに、勤怠管理向けに機能を置き換えています。
+
+## 概要
+
+AttendanceManager は、ユーザーごとの勤怠記録を管理するWebアプリケーションです。
+
+主な目的は、Spring Boot の基本的なMVC構成、Spring Securityによるログイン機能、Spring Data JPAによるDB操作を学習しながら、ポートフォリオとして説明できるアプリを作ることです。
+
+## 主な機能
+
+- ユーザー登録
+- ログイン / ログアウト
+- 出勤打刻
+- 退勤打刻
+- 勤怠一覧表示
+- 日付範囲による勤怠検索
+- 休憩時間の編集
+- 合計勤務時間の表示
+- ログイン中ユーザーごとの勤怠データ管理
+- 他ユーザーの勤怠記録へのアクセス制限
+
+## 使用技術
+
+- Java 21
+- Spring Boot 3.5.15
+- Spring Web
+- Spring Security
+- Spring Data JPA
+- Thymeleaf
+- PostgreSQL
+- Maven
+- Bootstrap 5
+
+## ディレクトリ構成
+
+```text
+src/main/java/com/example/attendancemanager
+├── config
+│   ├── DataInitializer.java
+│   └── SecurityConfig.java
+├── controller
+│   ├── AttendanceController.java
+│   ├── LoginController.java
+│   └── RegisterController.java
+├── entity
+│   ├── AppUser.java
+│   └── AttendanceRecord.java
+├── exception
+│   ├── AccessDeniedException.java
+│   └── GlobalExceptionHandler.java
+├── repository
+│   ├── AppUserRepository.java
+│   └── AttendanceRepository.java
+└── service
+    ├── AttendanceService.java
+    └── CustomUserDetailsService.java
+```
+
+## DB設定
+
+`src/main/resources/application.properties` で PostgreSQL に接続します。
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/attendancemanager
+spring.datasource.username=postgres
+spring.datasource.password=${DB_PASSWORD}
+```
+
+DBパスワードは環境変数 `DB_PASSWORD` に設定します。
+
+PowerShell の例:
+
+```powershell
+$env:DB_PASSWORD="your_postgres_password"
+```
+
+## 起動方法
+
+PostgreSQL に `attendancemanager` データベースを作成します。
+
+```sql
+CREATE DATABASE attendancemanager;
+```
+
+その後、プロジェクト直下で起動します。
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+ブラウザで以下にアクセスします。
+
+```text
+http://localhost:8080/login
+```
+
+## 初期ユーザー
+
+アプリ起動時に、以下の初期ユーザーを自動作成します。
+
+```text
+ユーザー名: admin
+パスワード: password
+```
+
+パスワードは BCrypt でハッシュ化して保存されます。
+
+## 画面
+
+- `/login` ログイン画面
+- `/register` ユーザー登録画面
+- `/attendance` 勤怠一覧画面
+- `/attendance/{id}/edit` 休憩時間編集画面
+
+## ER図
+
+```mermaid
+erDiagram
+    APP_USERS ||--o{ ATTENDANCE_RECORDS : has
+
+    APP_USERS {
+        BIGINT id PK
+        VARCHAR username
+        VARCHAR password
+        VARCHAR role
+        BOOLEAN enabled
+    }
+
+    ATTENDANCE_RECORDS {
+        BIGINT id PK
+        DATE work_date
+        TIMESTAMP clock_in_time
+        TIMESTAMP clock_out_time
+        INTEGER break_minutes
+        VARCHAR note
+        BIGINT user_id FK
+    }
+```
+
+## 今後追加したい機能
+
+- Docker Compose による起動環境
+- 勤怠記録の削除機能
+- 備考欄の編集
+- 打刻済みの日に重複して出勤できない制御
+- 月別集計
+- CSV出力
+- 管理者向けユーザー一覧
+- テストコードの追加
+- README用スクリーンショット
+
+## 学習ポイント
+
+- Controller / Service / Repository のレイヤー分割
+- Spring Security によるDB認証
+- BCrypt によるパスワードハッシュ化
+- JPAリポジトリによる検索処理
+- ログインユーザーごとのデータ分離
+- Thymeleaf による画面表示
