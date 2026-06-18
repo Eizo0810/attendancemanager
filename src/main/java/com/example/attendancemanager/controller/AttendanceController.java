@@ -3,6 +3,8 @@ package com.example.attendancemanager.controller;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -36,7 +38,8 @@ public class AttendanceController {
             Model model,
             Principal principal,
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate) {
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String targetMonth) {
 
         AppUser user = appUserRepository
                 .findByUsername(principal.getName())
@@ -44,7 +47,20 @@ public class AttendanceController {
 
         List<AttendanceRecord> records;
 
-        if (startDate != null && endDate != null) {
+        if (targetMonth != null && !targetMonth.isBlank()) {
+            try {
+                YearMonth yearMonth = YearMonth.parse(targetMonth);
+                startDate = yearMonth.atDay(1);
+                endDate = yearMonth.atEndOfMonth();
+                records = attendanceService.findByUserAndWorkDateBetween(
+                        user,
+                        startDate,
+                        endDate);
+            } catch (DateTimeParseException e) {
+                targetMonth = null;
+                records = attendanceService.findByUser(user);
+            }
+        } else if (startDate != null && endDate != null) {
             records = attendanceService.findByUserAndWorkDateBetween(
                     user,
                     startDate,
@@ -55,12 +71,19 @@ public class AttendanceController {
 
         long totalWorkingMinutes =
                 attendanceService.calculateTotalWorkingMinutes(records);
+        long workingDays = records.stream()
+                .filter(record -> record.getWorkingMinutes() > 0)
+                .map(AttendanceRecord::getWorkDate)
+                .distinct()
+                .count();
 
         model.addAttribute("records", records);
         model.addAttribute("totalWorkingHours", totalWorkingMinutes / 60);
         model.addAttribute("remainingMinutes", totalWorkingMinutes % 60);
+        model.addAttribute("workingDays", workingDays);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+        model.addAttribute("targetMonth", targetMonth);
 
         return "attendance/index";
     }

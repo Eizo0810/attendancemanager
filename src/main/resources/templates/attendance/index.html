@@ -33,8 +33,17 @@
     </div>
 
     <form th:action="@{/attendance}" method="get" class="mb-3">
-        <div class="row g-2">
+        <div class="row g-2 align-items-end">
             <div class="col-md-3">
+                <label class="form-label">対象月</label>
+                <input type="month"
+                       name="targetMonth"
+                       th:value="${targetMonth}"
+                       class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">開始日</label>
                 <input type="date"
                        name="startDate"
                        th:value="${startDate}"
@@ -42,6 +51,7 @@
             </div>
 
             <div class="col-md-3">
+                <label class="form-label">終了日</label>
                 <input type="date"
                        name="endDate"
                        th:value="${endDate}"
@@ -74,11 +84,18 @@
         </form>
     </div>
 
-    <p class="fw-bold">
-        合計勤務時間:
-        <span th:text="${totalWorkingHours}"></span>時間
-        <span th:text="${remainingMinutes}"></span>分
-    </p>
+    <div class="border rounded p-3 mb-3">
+        <h2 class="h5 mb-3">集計</h2>
+        <p class="mb-1">
+            合計勤務時間:
+            <span th:text="${totalWorkingHours}"></span>時間
+            <span th:text="${remainingMinutes}"></span>分
+        </p>
+        <p class="mb-0">
+            勤務日数:
+            <span th:text="${workingDays}"></span>日
+        </p>
+    </div>
 
     <table class="table table-bordered table-striped">
         <tr>
