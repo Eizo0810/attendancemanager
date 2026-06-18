@@ -16,6 +16,18 @@
         </form>
     </div>
 
+    <div th:if="${param.clockInExists}" class="alert alert-warning">
+        今日はすでに出勤済みです。
+    </div>
+
+    <div th:if="${param.noClockIn}" class="alert alert-warning">
+        退勤するには先に出勤してください。
+    </div>
+
+    <div th:if="${param.clockOutExists}" class="alert alert-warning">
+        今日はすでに退勤済みです。
+    </div>
+
     <form th:action="@{/attendance}" method="get" class="mb-3">
         <div class="row g-2">
             <div class="col-md-3">

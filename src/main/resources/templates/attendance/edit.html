@@ -21,6 +21,14 @@
                    min="0">
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">備考</label>
+            <textarea name="note"
+                      th:text="${record.note}"
+                      class="form-control"
+                      rows="3"></textarea>
+        </div>
+
         <button type="submit" class="btn btn-primary">更新</button>
 
         <a th:href="@{/attendance}" class="btn btn-secondary">戻る</a>

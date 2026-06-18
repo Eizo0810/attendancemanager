@@ -89,6 +89,10 @@ public class AttendanceController {
                 .findByUsername(principal.getName())
                 .orElseThrow();
 
+        if (attendanceService.findTodayRecord(user).isPresent()) {
+            return "redirect:/attendance?clockInExists";
+        }
+
         AttendanceRecord record = new AttendanceRecord();
 
         record.setUser(user);
@@ -109,7 +113,15 @@ public class AttendanceController {
                 .orElseThrow();
 
         AttendanceRecord record = attendanceService.findTodayRecord(user)
-                .orElseThrow();
+                .orElse(null);
+
+        if (record == null) {
+            return "redirect:/attendance?noClockIn";
+        }
+
+        if (record.getClockOutTime() != null) {
+            return "redirect:/attendance?clockOutExists";
+        }
 
         record.setClockOutTime(LocalDateTime.now());
 
@@ -122,6 +134,7 @@ public class AttendanceController {
     public String updateBreakMinutes(
             @PathVariable Long id,
             @RequestParam Integer breakMinutes,
+            @RequestParam(required = false) String note,
             Principal principal) {
 
         AppUser user = appUserRepository
@@ -131,6 +144,7 @@ public class AttendanceController {
         AttendanceRecord record = attendanceService.findByIdAndUser(id, user);
 
         record.setBreakMinutes(breakMinutes);
+        record.setNote(note);
 
         attendanceService.save(record);
 
