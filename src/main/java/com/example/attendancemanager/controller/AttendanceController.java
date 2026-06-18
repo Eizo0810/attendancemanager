@@ -1,11 +1,15 @@
 package com.example.attendancemanager.controller;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,6 +25,25 @@ import com.example.attendancemanager.service.AttendanceService;
 
 @Controller
 public class AttendanceController {
+
+    private static class AttendanceSearchResult {
+
+        private final List<AttendanceRecord> records;
+        private final LocalDate startDate;
+        private final LocalDate endDate;
+        private final String targetMonth;
+
+        AttendanceSearchResult(
+                List<AttendanceRecord> records,
+                LocalDate startDate,
+                LocalDate endDate,
+                String targetMonth) {
+            this.records = records;
+            this.startDate = startDate;
+            this.endDate = endDate;
+            this.targetMonth = targetMonth;
+        }
+    }
 
     private final AttendanceService attendanceService;
     private final AppUserRepository appUserRepository;
@@ -45,29 +68,12 @@ public class AttendanceController {
                 .findByUsername(principal.getName())
                 .orElseThrow();
 
-        List<AttendanceRecord> records;
-
-        if (targetMonth != null && !targetMonth.isBlank()) {
-            try {
-                YearMonth yearMonth = YearMonth.parse(targetMonth);
-                startDate = yearMonth.atDay(1);
-                endDate = yearMonth.atEndOfMonth();
-                records = attendanceService.findByUserAndWorkDateBetween(
-                        user,
-                        startDate,
-                        endDate);
-            } catch (DateTimeParseException e) {
-                targetMonth = null;
-                records = attendanceService.findByUser(user);
-            }
-        } else if (startDate != null && endDate != null) {
-            records = attendanceService.findByUserAndWorkDateBetween(
-                    user,
-                    startDate,
-                    endDate);
-        } else {
-            records = attendanceService.findByUser(user);
-        }
+        AttendanceSearchResult searchResult = searchAttendanceRecords(
+                user,
+                startDate,
+                endDate,
+                targetMonth);
+        List<AttendanceRecord> records = searchResult.records;
 
         long totalWorkingMinutes =
                 attendanceService.calculateTotalWorkingMinutes(records);
@@ -81,11 +87,51 @@ public class AttendanceController {
         model.addAttribute("totalWorkingHours", totalWorkingMinutes / 60);
         model.addAttribute("remainingMinutes", totalWorkingMinutes % 60);
         model.addAttribute("workingDays", workingDays);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("endDate", endDate);
-        model.addAttribute("targetMonth", targetMonth);
+        model.addAttribute("startDate", searchResult.startDate);
+        model.addAttribute("endDate", searchResult.endDate);
+        model.addAttribute("targetMonth", searchResult.targetMonth);
 
         return "attendance/index";
+    }
+
+    @GetMapping("/attendance/export")
+    public void exportCsv(
+            Principal principal,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String targetMonth,
+            HttpServletResponse response) throws IOException {
+
+        AppUser user = appUserRepository
+                .findByUsername(principal.getName())
+                .orElseThrow();
+
+        AttendanceSearchResult searchResult = searchAttendanceRecords(
+                user,
+                startDate,
+                endDate,
+                targetMonth);
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"attendance.csv\"");
+
+        PrintWriter writer = response.getWriter();
+        writer.write('\uFEFF');
+        writer.println("ID,勤務日,出勤時刻,退勤時刻,休憩時間(分),勤務時間(分),備考");
+
+        for (AttendanceRecord record : searchResult.records) {
+            writer.println(String.join(",",
+                    csvValue(record.getId()),
+                    csvValue(record.getWorkDate()),
+                    csvValue(record.getClockInTime()),
+                    csvValue(record.getClockOutTime()),
+                    csvValue(record.getBreakMinutes()),
+                    csvValue(record.getWorkingMinutes()),
+                    csvValue(record.getNote())));
+        }
     }
     
     @GetMapping("/attendance/{id}/edit")
@@ -188,5 +234,72 @@ public class AttendanceController {
         attendanceService.delete(record);
 
         return "redirect:/attendance?deleted";
+    }
+
+    private AttendanceSearchResult searchAttendanceRecords(
+            AppUser user,
+            LocalDate startDate,
+            LocalDate endDate,
+            String targetMonth) {
+
+        List<AttendanceRecord> records;
+
+        if (targetMonth != null && !targetMonth.isBlank()) {
+            try {
+                YearMonth yearMonth = YearMonth.parse(targetMonth);
+                LocalDate monthStartDate = yearMonth.atDay(1);
+                LocalDate monthEndDate = yearMonth.atEndOfMonth();
+                records = attendanceService.findByUserAndWorkDateBetween(
+                        user,
+                        monthStartDate,
+                        monthEndDate);
+
+                return new AttendanceSearchResult(
+                        records,
+                        monthStartDate,
+                        monthEndDate,
+                        targetMonth);
+            } catch (DateTimeParseException e) {
+                records = attendanceService.findByUser(user);
+
+                return new AttendanceSearchResult(records, null, null, null);
+            }
+        }
+
+        if (startDate != null && endDate != null) {
+            records = attendanceService.findByUserAndWorkDateBetween(
+                    user,
+                    startDate,
+                    endDate);
+
+            return new AttendanceSearchResult(
+                    records,
+                    startDate,
+                    endDate,
+                    null);
+        }
+
+        records = attendanceService.findByUser(user);
+
+        return new AttendanceSearchResult(records, startDate, endDate, null);
+    }
+
+    private String csvValue(Object value) {
+        if (value == null) {
+            return "";
+        }
+
+        String text = value.toString();
+
+        if (text.contains("\"")) {
+            text = text.replace("\"", "\"\"");
+        }
+
+        if (text.contains(",") || text.contains("\"")
+                || text.contains("\r") || text.contains("\n")) {
+            return "\"" + text + "\"";
+        }
+
+        return text;
     }
 }

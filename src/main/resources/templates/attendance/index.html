@@ -66,6 +66,11 @@
                 <a th:href="@{/attendance}" class="btn btn-outline-secondary">
                     クリア
                 </a>
+
+                <a th:href="@{/attendance/export(targetMonth=${targetMonth}, startDate=${startDate}, endDate=${endDate})}"
+                   class="btn btn-outline-success">
+                    CSV出力
+                </a>
             </div>
         </div>
     </form>
