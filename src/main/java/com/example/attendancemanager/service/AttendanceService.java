@@ -45,6 +45,10 @@ public class AttendanceService {
         return attendanceRepository.findByIdAndUser(id, user)
                 .orElseThrow(AccessDeniedException::new);
     }
+
+    public void delete(AttendanceRecord attendanceRecord) {
+        attendanceRepository.delete(attendanceRecord);
+    }
     
     public List<AttendanceRecord> findByUserAndWorkDateBetween(
             AppUser user,

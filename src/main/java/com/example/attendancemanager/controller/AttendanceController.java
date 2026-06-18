@@ -150,4 +150,20 @@ public class AttendanceController {
 
         return "redirect:/attendance";
     }
+
+    @PostMapping("/attendance/{id}/delete")
+    public String delete(
+            @PathVariable Long id,
+            Principal principal) {
+
+        AppUser user = appUserRepository
+                .findByUsername(principal.getName())
+                .orElseThrow();
+
+        AttendanceRecord record = attendanceService.findByIdAndUser(id, user);
+
+        attendanceService.delete(record);
+
+        return "redirect:/attendance?deleted";
+    }
 }

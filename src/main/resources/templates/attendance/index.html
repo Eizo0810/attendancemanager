@@ -28,6 +28,10 @@
         今日はすでに退勤済みです。
     </div>
 
+    <div th:if="${param.deleted}" class="alert alert-success">
+        勤怠記録を削除しました。
+    </div>
+
     <form th:action="@{/attendance}" method="get" class="mb-3">
         <div class="row g-2">
             <div class="col-md-3">
