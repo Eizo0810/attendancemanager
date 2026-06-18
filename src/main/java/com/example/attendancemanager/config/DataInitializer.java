@@ -25,13 +25,15 @@ public class DataInitializer implements CommandLineRunner {
         appUserRepository.findByUsername("admin").ifPresentOrElse(user -> {
             if (user.getPassword() == null || !user.getPassword().startsWith("$2")) {
                 user.setPassword(passwordEncoder.encode("password"));
-                appUserRepository.save(user);
             }
+            user.setRole("ADMIN");
+            user.setEnabled(true);
+            appUserRepository.save(user);
         }, () -> {
             AppUser user = new AppUser();
             user.setUsername("admin");
             user.setPassword(passwordEncoder.encode("password"));
-            user.setRole("USER");
+            user.setRole("ADMIN");
             user.setEnabled(true);
 
             appUserRepository.save(user);
