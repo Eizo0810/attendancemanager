@@ -103,6 +103,16 @@ CREATE DATABASE attendancemanager;
 http://localhost:8080/login
 ```
 
+## テスト実行
+
+Pleiades同梱のJava 21を使ってテストを実行するスクリプトを用意しています。
+
+```powershell
+.\scripts\test.ps1
+```
+
+このスクリプトは `JAVA_HOME` を `C:\pleiades\2025-09_Java\java\21` に設定してから、Maven Wrapperでテストを実行します。
+
 ## 初期ユーザー
 
 アプリ起動時に、以下の初期ユーザーを自動作成します。
