@@ -60,9 +60,6 @@ src/main/java/com/example/attendancemanager
 ├── entity
 │   ├── AppUser.java
 │   └── AttendanceRecord.java
-├── exception
-│   ├── AccessDeniedException.java
-│   └── GlobalExceptionHandler.java
 ├── repository
 │   ├── AppUserRepository.java
 │   └── AttendanceRepository.java

@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.attendancemanager.entity.AppUser;
 import com.example.attendancemanager.entity.AttendanceRecord;
-import com.example.attendancemanager.exception.AccessDeniedException;
 import com.example.attendancemanager.repository.AttendanceRepository;
 
 class AttendanceServiceTest {
@@ -84,7 +84,8 @@ class AttendanceServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> attendanceService.findByIdAndUser(99L, user))
-                .isInstanceOf(AccessDeniedException.class);
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("403 FORBIDDEN");
     }
 
     @Test
