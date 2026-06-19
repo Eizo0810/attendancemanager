@@ -204,6 +204,7 @@ public class AttendanceController {
             @PathVariable Long id,
             @RequestParam Integer breakMinutes,
             @RequestParam(required = false) String note,
+            Model model,
             Principal principal) {
 
         AppUser user = appUserRepository
@@ -215,7 +216,13 @@ public class AttendanceController {
         record.setBreakMinutes(breakMinutes);
         record.setNote(note);
 
-        attendanceService.save(record);
+        try {
+            attendanceService.save(record);
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("record", record);
+            model.addAttribute("error", e.getMessage());
+            return "attendance/edit";
+        }
 
         return "redirect:/attendance";
     }

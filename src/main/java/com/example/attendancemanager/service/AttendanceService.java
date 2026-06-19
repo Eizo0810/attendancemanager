@@ -1,5 +1,6 @@
 package com.example.attendancemanager.service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +27,8 @@ public class AttendanceService {
     }
 
     public AttendanceRecord save(AttendanceRecord attendanceRecord) {
+        validateBreakMinutes(attendanceRecord);
+
         return attendanceRepository.save(attendanceRecord);
     }
     
@@ -68,5 +71,32 @@ public class AttendanceService {
         return records.stream()
                 .mapToLong(AttendanceRecord::getWorkingMinutes)
                 .sum();
+    }
+
+    private void validateBreakMinutes(AttendanceRecord attendanceRecord) {
+        Integer breakMinutes = attendanceRecord.getBreakMinutes();
+
+        if (breakMinutes == null) {
+            return;
+        }
+
+        if (breakMinutes < 0) {
+            throw new IllegalArgumentException(
+                    "休憩時間は0分以上で入力してください。");
+        }
+
+        if (attendanceRecord.getClockInTime() == null
+                || attendanceRecord.getClockOutTime() == null) {
+            return;
+        }
+
+        long elapsedMinutes = Duration.between(
+                attendanceRecord.getClockInTime(),
+                attendanceRecord.getClockOutTime()).toMinutes();
+
+        if (breakMinutes > elapsedMinutes) {
+            throw new IllegalArgumentException(
+                    "休憩時間は勤務時間以内で入力してください。");
+        }
     }
 }

@@ -103,6 +103,6 @@ public class AttendanceRecord {
             minutes -= breakMinutes;
         }
 
-        return minutes;
+        return Math.max(minutes, 0);
     }
 }

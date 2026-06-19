@@ -46,6 +46,15 @@ class AttendanceServiceTest {
     }
 
     @Test
+    void getWorkingMinutesDoesNotReturnNegativeValue() {
+        AttendanceRecord record = createRecord(9, 0, 10, 0, 90);
+
+        long workingMinutes = record.getWorkingMinutes();
+
+        assertThat(workingMinutes).isZero();
+    }
+
+    @Test
     void calculateTotalWorkingMinutesSumsRecords() {
         AttendanceRecord first = createRecord(9, 0, 18, 0, 60);
         AttendanceRecord second = createRecord(10, 0, 17, 0, 45);
@@ -54,6 +63,24 @@ class AttendanceServiceTest {
                 List.of(first, second));
 
         assertThat(totalMinutes).isEqualTo(855);
+    }
+
+    @Test
+    void saveThrowsExceptionWhenBreakMinutesIsNegative() {
+        AttendanceRecord record = createRecord(9, 0, 18, 0, -1);
+
+        assertThatThrownBy(() -> attendanceService.save(record))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("休憩時間は0分以上で入力してください。");
+    }
+
+    @Test
+    void saveThrowsExceptionWhenBreakMinutesExceedsElapsedMinutes() {
+        AttendanceRecord record = createRecord(9, 0, 10, 0, 61);
+
+        assertThatThrownBy(() -> attendanceService.save(record))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("休憩時間は勤務時間以内で入力してください。");
     }
 
     @Test

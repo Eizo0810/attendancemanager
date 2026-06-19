@@ -10,6 +10,8 @@
 
     <h1 class="mb-4">勤怠編集</h1>
 
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
     <form th:action="@{/attendance/{id}/edit(id=${record.id})}" method="post">
 
         <div class="mb-3">
