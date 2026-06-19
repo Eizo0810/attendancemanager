@@ -30,13 +30,28 @@ public class RegisterController {
     @PostMapping("/register")
     public String register(String username, String password, Model model) {
 
-        if (appUserRepository.findByUsername(username).isPresent()) {
+        String normalizedUsername = username == null ? "" : username.trim();
+
+        if (normalizedUsername.isBlank() || password == null || password.isBlank()) {
+            model.addAttribute("error", "ユーザー名とパスワードを入力してください。");
+            model.addAttribute("username", normalizedUsername);
+            return "register";
+        }
+
+        if (password.length() < 8) {
+            model.addAttribute("error", "パスワードは8文字以上で入力してください。");
+            model.addAttribute("username", normalizedUsername);
+            return "register";
+        }
+
+        if (appUserRepository.findByUsername(normalizedUsername).isPresent()) {
             model.addAttribute("error", "このユーザー名はすでに使われています。");
+            model.addAttribute("username", normalizedUsername);
             return "register";
         }
 
         AppUser user = new AppUser();
-        user.setUsername(username);
+        user.setUsername(normalizedUsername);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole("USER");
         user.setEnabled(true);
